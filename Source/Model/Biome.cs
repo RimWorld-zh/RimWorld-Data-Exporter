@@ -27,28 +27,19 @@ namespace RimWorldDataExporter.Model {
 
         public string texture;
 
+        [NoCrawl]
         public List<NameValueFloat> wildAnimals = new List<NameValueFloat>();
+
+        [NoCrawl]
         public List<NameValueFloat> wildPlants = new List<NameValueFloat>();
+
+        [NoCrawl]
         public List<NameValueFloat> diseases = new List<NameValueFloat>();
 
         public override void Crawl(Def baseDef) {
             base.Crawl(baseDef);
+
             var def = baseDef as BiomeDef;
-
-            this.animalDensity = def.animalDensity;
-            this.plantDensity = def.plantDensity;
-            this.diseaseMtbDays = def.diseaseMtbDays;
-            this.factionBaseSelectionWeight = def.factionBaseSelectionWeight;
-
-            this.impassable = def.impassable;
-            this.hasVirtualPlants = def.hasVirtualPlants;
-
-            this.pathCost_spring = def.pathCost_spring;
-            this.pathCost_summer = def.pathCost_summer;
-            this.pathCost_fall = def.pathCost_fall;
-            this.pathCost_winter = def.pathCost_winter;
-
-            this.texture = def.texture;
 
             foreach (var animalPawnKind in DefDatabase<PawnKindDef>.AllDefs) {
                 float value = def.CommonalityOfAnimal(animalPawnKind) / animalPawnKind.wildSpawn_GroupSizeRange.Average;

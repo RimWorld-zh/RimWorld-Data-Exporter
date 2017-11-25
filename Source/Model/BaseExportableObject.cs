@@ -22,7 +22,7 @@ namespace RimWorldDataExporter.Model {
         public string defName;
 
         public virtual void Crawl(Def baseDef) {
-            this.defName = baseDef.defName;
+            Crawler.Crawl(this, baseDef);
         }
 
         public void Save(string path) {
@@ -49,8 +49,6 @@ namespace RimWorldDataExporter.Model {
 
         public override void Crawl(Def def) {
             base.Crawl(def);
-            this.label = def.label;
-            this.description = def.description;
         }
     }
 }
