@@ -54,8 +54,8 @@ namespace RimWorldDataExporter.Model {
 
             // import
             foreach (var data in dataList) {
-                data.Save(Path.Combine(path, $"{data.defName}.json"));
-                sbIndex.AppendLine($"import {data.defName} from './{data.defName}.json';");
+                data.Save(Path.Combine(path, $"{data.defName}.ts"));
+                sbIndex.AppendLine($"import {data.defName} from './{data.defName}';");
             }
             sbIndex.AppendLine();
 

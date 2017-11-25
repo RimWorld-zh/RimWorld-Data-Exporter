@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using UnityEngine;
+using Verse;
+using RimWorld;
 
 namespace RimWorldDataExporter.Helper.Serialization {
     class Serializable : Attribute {}
@@ -19,7 +22,7 @@ namespace RimWorldDataExporter.Helper.Serialization {
             },
             {
                 typeof(string),
-                value => $"\"{value}\""
+                value => $"'{value}'"
             },
             {
                 typeof(int),
@@ -35,7 +38,7 @@ namespace RimWorldDataExporter.Helper.Serialization {
             },
         };
 
-        private static string IListToJson<T> (IList<T> list, int level) {
+        private static string IListToTypeScript<T> (IList<T> list, int level) {
             if (list == null) return "null";
             if (list.Count == 0) return "[]";
 
@@ -53,7 +56,7 @@ namespace RimWorldDataExporter.Helper.Serialization {
                     separatorBuilder.Append("  ");
                 }
                 string separator = separatorBuilder.ToString();
-                sb.AppendLine(string.Join(separator, list.Select(item => $"{item.ToJson(level + 1)}").ToArray()));
+                sb.AppendLine(string.Join(separator, list.Select(item => $"{item.ToTypeSrcipt(level + 1)}").ToArray()));
                 for (int i = 0; i < level - 1; i++) {
                     sb.Append("  ");
                 }
@@ -62,7 +65,7 @@ namespace RimWorldDataExporter.Helper.Serialization {
             }
         }
 
-        private static string IDictionaryToJson<TKey, TValue>(IDictionary<TKey, TValue> dict, int level) {
+        private static string IDictionaryToTypeScript<TKey, TValue>(IDictionary<TKey, TValue> dict, int level) {
             if (dict == null) return "null";
             if (dict.Count == 0) return "{}";
 
@@ -77,7 +80,7 @@ namespace RimWorldDataExporter.Helper.Serialization {
                 separatorBuilder.Append("  ");
             }
             string separator = separatorBuilder.ToString();
-            sb.AppendLine(string.Join(separator, dict.Select(kvp => $"\"{kvp.Key}\": {kvp.Value.ToJson(level + 1)}").ToArray()));
+            sb.AppendLine(string.Join(separator, dict.Select(kvp => $"'{kvp.Key}': {kvp.Value.ToTypeSrcipt(level + 1)}").ToArray()));
             for (int i = 0; i < level - 1; i++) {
                 sb.Append("  ");
             }
@@ -85,33 +88,43 @@ namespace RimWorldDataExporter.Helper.Serialization {
             return sb.ToString();
         }
 
-        public static string ToJson(this object obj, int level = 1) {
+        public static string ToTypeSrcipt(this object obj, int level = 1) {
             if (obj == null) return "null";
 
             Type objType = obj.GetType();
 
-            Func<object, string> converter;
-            if (basicConverters.TryGetValue(objType, out converter)) {
+            if (basicConverters.TryGetValue(objType, out Func<object, string> converter)) {
                 return converter.Invoke(obj);
+            }
+
+            if (objType.IsSubclassOf(typeof(Def))) {
+                return $"'{(obj as Def).defName}'";
+            }
+
+            if (objType.IsEnum) {
+                return $"{objType.Name}.{obj.ToString()}";
             }
 
             foreach (Type iType in objType.GetInterfaces()) {
                 if (iType.IsGenericType) {
                     Type genericTypeDefinition = iType.GetGenericTypeDefinition();
                     if (genericTypeDefinition == typeof(IList<>)) {
-                        return (string)typeof(Serializer).GetMethod("IListToJson", BindingFlags.Static | BindingFlags.NonPublic)
+                        return (string)typeof(Serializer).GetMethod("IListToTypeScript", BindingFlags.Static | BindingFlags.NonPublic)
                             .MakeGenericMethod(iType.GetGenericArguments())
                             .Invoke(null, new object[] { obj, level});
                     }
                     if (genericTypeDefinition == typeof(IDictionary<,>)) {
-                        return (string)typeof(Serializer).GetMethod("IDictionaryToJson", BindingFlags.Static | BindingFlags.NonPublic)
+                        return (string)typeof(Serializer).GetMethod("IDictionaryToTypeScript", BindingFlags.Static | BindingFlags.NonPublic)
                             .MakeGenericMethod(iType.GetGenericArguments())
                             .Invoke(null, new object[] { obj, level });
                     }
                 }
             }
 
-            if (Attribute.GetCustomAttribute(objType, typeof(Serializable), true) != null) {
+            if (Attribute.GetCustomAttribute(objType, typeof(Serializable), true) != null ||
+                objType.IsSubclassOf(typeof(ITypeable)) ||
+                TypeScriptHelper.additinalTypes.Contains(objType)) {
+
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine("{");
 
@@ -126,7 +139,7 @@ namespace RimWorldDataExporter.Helper.Serialization {
                     for (int j = 0; j < level; j++) {
                         sb.Append("  ");
                     }
-                    sb.Append($"\"{fieldName}\": {fieldValue.ToJson(level + 1)}");
+                    sb.Append($"{fieldName}: {fieldValue.ToTypeSrcipt(level + 1)}");
                     if (i < allFieldInfos.Length - 1) {
                         sb.AppendLine(",");
                     } else {

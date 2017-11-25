@@ -27,7 +27,12 @@ namespace RimWorldDataExporter.Model {
 
         public void Save(string path) {
             //File.WriteAllText(path, JsonUtility.ToJson(this, true));
-            File.WriteAllText(path, this.ToJson());
+            StringBuilder sb = new StringBuilder();
+            sb.Append($"const {this.defName}: {this.GetType().Name} = ");
+            sb.AppendLine(this.ToTypeSrcipt());
+            sb.AppendLine();
+            sb.AppendLine($"export default {this.defName};");
+            File.WriteAllText(path, sb.ToString());
         }
 
         public bool Equals(EObj other) {

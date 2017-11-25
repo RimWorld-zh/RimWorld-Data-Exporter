@@ -4,14 +4,22 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using UnityEngine;
 using Verse;
+using RimWorld;
 using RimWorldDataExporter.Model;
 
 namespace RimWorldDataExporter.Helper.Serialization {
-    interface ITypeable { }
+    class ITypeable { }
 
     static class TypeScriptHelper {
         private readonly static BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+
+        public readonly static List<Type> additinalTypes = new List<Type> {
+            typeof(FloatRange),
+        };
+
+        public readonly static HashSet<Type> enumTypes = new HashSet<Type>();
 
         #region To TypeScript type name
 
@@ -36,10 +44,20 @@ namespace RimWorldDataExporter.Helper.Serialization {
                 return typeName;
             }
 
+            if (type.IsSubclassOf(typeof(Def))) {
+                return "string";
+            }
+
             if (type == typeof(EObj)
                 || type.IsSubclassOf(typeof(EObj)) 
                 || type.IsSubclassOf(typeof(ITypeable))
+                || additinalTypes.Contains(type)
                 ) {
+                return type.Name;
+            }
+
+            if (type.IsEnum) {
+                enumTypes.Add(type);
                 return type.Name;
             }
             
@@ -79,37 +97,12 @@ namespace RimWorldDataExporter.Helper.Serialization {
         }
 
         public static void SaveAllTypesDeclaration(string path) {
-            SaveAllITypeableClassesDeclaration(Path.Combine(path, "basic.d.ts"));
-            SaveDeclaration(Path.Combine(path, "base.d.ts"), new[] { typeof(EData), typeof(ELang) }, typeof(EObj), "base");
-
             SaveAllEObjSubclassesDeclaration(Path.Combine(path, "data.d.ts"), typeof(EData), "data");
             SaveAllEObjSubclassesDeclaration(Path.Combine(path, "lang.d.ts"), typeof(ELang), "language");
-        }
 
-        private static void SaveAllITypeableClassesDeclaration(string path) {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("// Declaration for basic model types.");
-
-            sb.AppendLine("declare interface ReadonlyDict<T> {");
-            sb.AppendLine("  readonly [key: string]: T");
-            sb.AppendLine("}");
-            sb.AppendLine();
-
-            var allITypeableClasses = typeof(ITypeable).AllSubclassesNonAbstract().ToList();
-            allITypeableClasses.Sort((Type a, Type b) => {
-                return a.Name.CompareTo(b.Name);
-            });
-
-            foreach (var iTypeableClass in allITypeableClasses) {
-                sb.AppendLine();
-                sb.AppendLine($"declare interface {iTypeableClass.Name} {{");
-                foreach (var fieldInfo in iTypeableClass.GetFields(flags)) {
-                    sb.AppendLine($"  readonly {fieldInfo.Name}: {fieldInfo.FieldType.ToTypeName()};");
-                }
-                sb.AppendLine("}");
-            }
-
-            File.WriteAllText(path, sb.ToString());
+            SaveAllITypeableClassesDeclaration(Path.Combine(path, "basic.d.ts"));
+            SaveDeclaration(Path.Combine(path, "base.d.ts"), new[] { typeof(EData), typeof(ELang) }, typeof(EObj), "base");
+            SaveAllEnumDeclaration(Path.Combine(path, "enum.d.ts"));
         }
 
         private static void SaveDeclaration(string path, Type[] types, Type baseType, string comment) {
@@ -157,6 +150,52 @@ namespace RimWorldDataExporter.Helper.Serialization {
             foreach (var kvp in declarationMap[ebase]) {
                 sb.AppendLine();
                 sb.AppendLine(kvp.Value.ToString());
+            }
+
+            File.WriteAllText(path, sb.ToString());
+        }
+
+        private static void SaveAllITypeableClassesDeclaration(string path) {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("// Declaration for basic model types.");
+
+            sb.AppendLine("declare interface ReadonlyDict<T> {");
+            sb.AppendLine("  readonly [key: string]: T");
+            sb.AppendLine("}");
+
+            var allITypeableClasses = typeof(ITypeable).AllSubclassesNonAbstract().Concat(additinalTypes).ToList();
+            allITypeableClasses.Sort((Type a, Type b) => {
+                return a.Name.CompareTo(b.Name);
+            });
+
+            foreach (var iTypeableClass in allITypeableClasses) {
+                sb.AppendLine();
+                sb.AppendLine($"declare interface {iTypeableClass.Name} {{");
+                foreach (var fieldInfo in iTypeableClass.GetFields(flags)) {
+                    sb.AppendLine($"  readonly {fieldInfo.Name}: {fieldInfo.FieldType.ToTypeName()};");
+                }
+                sb.AppendLine("}");
+            }
+
+            File.WriteAllText(path, sb.ToString());
+        }
+
+        private static void SaveAllEnumDeclaration(string path) {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("// Declaration for enum types.");
+
+            var allEnumTypes = enumTypes.ToList();
+            allEnumTypes.Sort((Type a, Type b) => {
+                return a.Name.CompareTo(b.Name);
+            });
+
+            foreach (var enumType in allEnumTypes) {
+                sb.AppendLine();
+                sb.AppendLine($"declare enum {enumType.Name} {{");
+                foreach (var name in Enum.GetNames(enumType)) {
+                    sb.AppendLine($"  {name},");
+                }
+                sb.AppendLine("}");
             }
 
             File.WriteAllText(path, sb.ToString());

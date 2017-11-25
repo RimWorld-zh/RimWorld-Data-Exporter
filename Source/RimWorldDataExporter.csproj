@@ -59,6 +59,8 @@
     <Compile Include="Model\Database.cs" />
     <Compile Include="Helper\DataExtension.cs" />
     <Compile Include="Model\Difficulty.cs" />
+    <Compile Include="Model\Faction.cs" />
+    <Compile Include="Model\Hair.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

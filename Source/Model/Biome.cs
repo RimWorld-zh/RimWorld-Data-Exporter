@@ -28,13 +28,13 @@ namespace RimWorldDataExporter.Model {
         public string texture;
 
         [NoCrawl]
-        public List<NameValueFloat> wildAnimals = new List<NameValueFloat>();
+        public List<FloatDefValue> wildAnimals = new List<FloatDefValue>();
 
         [NoCrawl]
-        public List<NameValueFloat> wildPlants = new List<NameValueFloat>();
+        public List<FloatDefValue> wildPlants = new List<FloatDefValue>();
 
         [NoCrawl]
-        public List<NameValueFloat> diseases = new List<NameValueFloat>();
+        public List<FloatDefValue> diseases = new List<FloatDefValue>();
 
         public override void Crawl(Def baseDef) {
             base.Crawl(baseDef);
@@ -44,21 +44,21 @@ namespace RimWorldDataExporter.Model {
             foreach (var animalPawnKind in DefDatabase<PawnKindDef>.AllDefs) {
                 float value = def.CommonalityOfAnimal(animalPawnKind) / animalPawnKind.wildSpawn_GroupSizeRange.Average;
                 if (value > 0) {
-                    this.wildAnimals.Add(new NameValueFloat(animalPawnKind.defName, value));
+                    this.wildAnimals.Add(new FloatDefValue(animalPawnKind.defName, value));
                 }
             }
 
             foreach (var plantThing in DefDatabase<ThingDef>.AllDefs) {
                 float value = def.CommonalityOfPlant(plantThing);
                 if (value > 0) {
-                    this.wildPlants.Add(new NameValueFloat(plantThing.defName, value));
+                    this.wildPlants.Add(new FloatDefValue(plantThing.defName, value));
                 }
             }
 
             foreach (var diseaseIncident in DefDatabase<IncidentDef>.AllDefs) {
                 float value = def.CommonalityOfDisease(diseaseIncident);
                 if (value > 0) {
-                    this.diseases.Add(new NameValueFloat(diseaseIncident.diseaseIncident.defName, value));
+                    this.diseases.Add(new FloatDefValue(diseaseIncident.diseaseIncident.defName, value));
                 }
             }
         }
