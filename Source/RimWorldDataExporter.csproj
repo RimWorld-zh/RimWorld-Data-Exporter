@@ -57,6 +57,7 @@
     <Compile Include="Model\Biome.cs" />
     <Compile Include="Model\BaseExportableObject.cs" />
     <Compile Include="Model\Damage.cs" />
+    <Compile Include="Model\DamageArmorCategory.cs" />
     <Compile Include="Model\Database.cs" />
     <Compile Include="Helper\DataExtension.cs" />
     <Compile Include="Model\Difficulty.cs" />
