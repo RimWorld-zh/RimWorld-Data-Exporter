@@ -25,10 +25,10 @@ namespace RimWorldDataExporter.Helper.Serialization {
 
         private static Dictionary<Type, string> basicTypeMap = new Dictionary<Type, string> {
             { typeof(bool), "boolean" },
-            { typeof(string), "string" },
-            { typeof(int), "number" },
-            { typeof(float), "number" },
-            { typeof(double), "number" },
+            { typeof(string), "string | null" },
+            { typeof(int), "number | null" },
+            { typeof(float), "number | null" },
+            { typeof(double), "number | null" },
         };
 
         private static string IListToTypeName<T> () {
@@ -45,7 +45,7 @@ namespace RimWorldDataExporter.Helper.Serialization {
             }
 
             if (type.IsSubclassOf(typeof(Def))) {
-                return "string";
+                return "string | null";
             }
 
             if (type == typeof(EObj)
