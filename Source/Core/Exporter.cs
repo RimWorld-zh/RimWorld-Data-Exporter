@@ -13,7 +13,8 @@ using RimWorldDataExporter.Helper.Serialization;
 
 namespace RimWorldDataExporter.Core {
 	static class Exporter {
-        private static string OriginLangFolderName;
+        private static string originLangFolderName;
+        private static string outputPath;
 
         private static List<List<string>> LanguageMap = new List<List<string>> {
             new List<string> { "en", "English" },
@@ -22,6 +23,13 @@ namespace RimWorldDataExporter.Core {
         };
 
         public static void Export() {
+            var currentDir = new DirectoryInfo(Directory.GetCurrentDirectory())?.Parent?.Parent?.Parent;
+            if (currentDir == null) {
+                throw new Exception("Can not get RimWorld installation directory.");
+            }
+
+            Exporter.outputPath = Path.Combine(currentDir.FullName, "RimWorld-Database");
+
 			if (ModsConfig.ActiveModsInLoadOrder.Count() > 2) {
 				Log.Error("Active mods is more than 2. Must only active 'Core' and 'RimWorld Data Exporter'.");
 				return;
@@ -33,11 +41,11 @@ namespace RimWorldDataExporter.Core {
         }
 
 		private static void ExportDatabase() {
-			var outputPath = Path.Combine(GenFilePaths.DevOutputFolderPath, "database");
-			if (Directory.Exists(outputPath)) {
-				Directory.Delete(outputPath, true);
+			var databasePath = Path.Combine(Exporter.outputPath, "database");
+			if (Directory.Exists(databasePath)) {
+				Directory.Delete(databasePath, true);
 			}
-			Directory.CreateDirectory(outputPath);
+			Directory.CreateDirectory(databasePath);
 
             var allDataTypes = typeof(EData).AllSubclassesNonAbstract().ToList();
             allDataTypes.Sort((Type a, Type b) => {
@@ -48,24 +56,24 @@ namespace RimWorldDataExporter.Core {
                 var typeArguments = new Type[] { dataType, (Activator.CreateInstance(dataType) as EData).DefType };
                 var databaseType = typeof(Database<,>).MakeGenericType(typeArguments);
                 var category = databaseType.GetProperty("Category").GetValue(null, null) as string;
-                databaseType.GetMethod("Save", BindingFlags.Static | BindingFlags.Public).Invoke(null, new[] { Path.Combine(outputPath, category) });
+                databaseType.GetMethod("Save", BindingFlags.Static | BindingFlags.Public).Invoke(null, new[] { Path.Combine(databasePath, category) });
             }
 		}
 
         private static void ExportAllLangbase() {
-            var rootPath = Path.Combine(GenFilePaths.DevOutputFolderPath, "languages");
-            if (Directory.Exists(rootPath)) {
-                Directory.Delete(rootPath, true);
+            var languagesPath = Path.Combine(Exporter.outputPath, "languages");
+            if (Directory.Exists(languagesPath)) {
+                Directory.Delete(languagesPath, true);
             }
-            Directory.CreateDirectory(rootPath);
+            Directory.CreateDirectory(languagesPath);
 
-            OriginLangFolderName = Prefs.LangFolderName;
-            ExportLangbase(rootPath, 0);
+            originLangFolderName = Prefs.LangFolderName;
+            ExportLangbase(languagesPath, 0);
         }
 
         private static void ExportLangbase(string path, int index) {
             if (index >= LanguageMap.Count) {
-                Prefs.LangFolderName = OriginLangFolderName;
+                Prefs.LangFolderName = originLangFolderName;
                 LongEventHandler.QueueLongEvent(delegate
                 {
                     PlayDataLoader.ClearAllPlayData();
@@ -113,7 +121,7 @@ namespace RimWorldDataExporter.Core {
         }
 
         private static void ExportDeclaration() {
-            var outputPath = Path.Combine(GenFilePaths.DevOutputFolderPath, "typings");
+            var outputPath = Path.Combine(Exporter.outputPath, "typings");
             if (Directory.Exists(outputPath)) {
                 Directory.Delete(outputPath, true);
             }
