@@ -25,14 +25,14 @@ namespace RimWorldDataExporter.Helper.Serialization {
 
         private static Dictionary<Type, string> basicTypeMap = new Dictionary<Type, string> {
             { typeof(bool), "boolean" },
+            { typeof(int), "number" },
+            { typeof(float), "number" },
+            { typeof(double), "number" },
             { typeof(string), "string | null" },
-            { typeof(int), "number | null" },
-            { typeof(float), "number | null" },
-            { typeof(double), "number | null" },
         };
 
         private static string IListToTypeName<T> () {
-            return $"ReadonlyArray<{typeof(T).ToTypeName()}>";
+            return $"ReadonlyArray<{typeof(T).ToTypeName()}> | null";
         }
 
         private static string IDictToTypeName<TKey, TValue>() {
@@ -139,7 +139,7 @@ namespace RimWorldDataExporter.Helper.Serialization {
 
             foreach (var subclass in allSubclasses) {
                 sb.AppendLine();
-                sb.AppendLine($"declare interface {subclass.Name} extends {baseType.Name} {{");
+                sb.AppendLine($"declare interface {subclass.Name} extends {subclass.BaseType.Name} {{");
                 foreach (var fieldInfo in subclass.GetFields(flags)) {
                     sb.AppendLine($"  readonly {fieldInfo.Name}: {fieldInfo.FieldType.ToTypeName()};");
                 }
