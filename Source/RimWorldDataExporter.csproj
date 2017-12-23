@@ -63,6 +63,7 @@
     <Compile Include="Model\Difficulty.cs" />
     <Compile Include="Model\Faction.cs" />
     <Compile Include="Model\Hair.cs" />
+    <Compile Include="Model\Terrain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
