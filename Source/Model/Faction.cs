@@ -42,25 +42,23 @@ namespace RimWorldDataExporter.Model {
         public bool appreciative = true;
         public string homeIconPath;
         public string expandingIconTexture;
+        public List<Color> colorSpectrum;
 
 
         [NoCrawl]
-        public List<string> allMemberKinds = new List<string>();
+        public List<string> allMemberKinds;
 
         [NoCrawl]
-        public List<string> apparelStuffs = new List<string>();
+        public List<string> apparelStuffs;
 
         [NoCrawl]
-        public List<string> caravanTraderKinds = new List<string>();
+        public List<string> caravanTraderKinds;
 
         [NoCrawl]
-        public List<string> visitorTraderKinds = new List<string>();
+        public List<string> visitorTraderKinds;
 
         [NoCrawl]
-        public List<string> baseTraderKinds = new List<string>();
-
-        [NoCrawl]
-        public List<string> colorSpectrum = new List<string>();
+        public List<string> baseTraderKinds;
 
         public override void Crawl(Def baseDef) {
             base.Crawl(baseDef);
@@ -68,6 +66,7 @@ namespace RimWorldDataExporter.Model {
             FactionDef def = baseDef as FactionDef;
 
             if (def.pawnGroupMakers != null) {
+                this.allMemberKinds = new List<string>();
                 foreach (var pawnGroupMaker in def.pawnGroupMakers) {
                     if (pawnGroupMaker.options != null) {
                         foreach (var pawnGenOption in pawnGroupMaker.options) {
@@ -94,30 +93,28 @@ namespace RimWorldDataExporter.Model {
             }
 
             if (def.apparelStuffFilter != null) {
+                this.apparelStuffs = new List<string>();
                 foreach (var thing in DefDatabase<ThingDef>.AllDefs.Where(d => def.apparelStuffFilter.Allows(d))) {
                     this.apparelStuffs.Add(thing.defName);
                 }
             }
 
             if (def.caravanTraderKinds != null) {
+                this.caravanTraderKinds = new List<string>();
                 foreach (var trader in def.caravanTraderKinds) {
                     this.caravanTraderKinds.Add(trader.defName);
                 }
             }
             if (def.visitorTraderKinds != null) {
+                this.visitorTraderKinds = new List<string>();
                 foreach (var trader in def.visitorTraderKinds) {
                     this.visitorTraderKinds.Add(trader.defName);
                 }
             }
             if (def.baseTraderKinds != null) {
+                this.baseTraderKinds = new List<string>();
                 foreach (var trader in def.baseTraderKinds) {
                     this.baseTraderKinds.Add(trader.defName);
-                }
-            }
-
-            if (def.colorSpectrum != null) {
-                foreach (var color in def.colorSpectrum) {
-                    this.colorSpectrum.Add(color.ToCssColor());
                 }
             }
         }

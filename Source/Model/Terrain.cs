@@ -8,7 +8,7 @@ using RimWorld;
 using RimWorldDataExporter.Helper;
 
 namespace RimWorldDataExporter.Model {
-    class DataTerrain : DataBuildable {
+    class DataTerrain : EData {
         public static readonly List<StatDef> allStatDefs = new List<StatDef> {
             StatDefOf.Beauty,
             StatDefOf.Cleanliness,
@@ -33,9 +33,39 @@ namespace RimWorldDataExporter.Model {
         public TechLevel minTechLevelToBuild;
         public TechLevel maxTechLevelToBuild;
 
+        public string texturePath;
+        public Color color = Color.white;
+
+        public List<TerrainAffordance> affordances = new List<TerrainAffordance>();
+        public bool takeFootprints;
+        public bool takeSplashes;
+        public bool avoidWander;
+        public bool holdSnow = true;
+        public bool extinguishesFire;
+
+        public bool changeable = true;
+        public TerrainDef smoothedTerrain;
+        public TerrainDef driesTo;
+        public TerrainDef burnedDef;
+
+        public ThingDef terrainFilthDef;
+        public bool acceptTerrainSourceFilth;
+        public bool acceptFilth = true;
+
         [NoCrawl]
         public List<FloatDefValue> stats = new List<FloatDefValue>();
 
+        [NoCrawl]
+        public List<IntDefValue> costList;
+
+        [NoCrawl]
+        public float walkSpeed;
+
+        [NoCrawl]
+        public bool removable;
+        [NoCrawl]
+        public bool isCarpet;
+        
         public override void Crawl(Def baseDef) {
             base.Crawl(baseDef);
 
@@ -44,6 +74,12 @@ namespace RimWorldDataExporter.Model {
             foreach (StatDef statDef in allStatDefs) {
                 stats.Add(new FloatDefValue(statDef, def.GetStatValueAbstract(statDef)));
             }
+            this.costList = def.costList?.Select(thingCount => {
+                return new IntDefValue(thingCount.thingDef, thingCount.count);
+            }).ToList();
+            this.walkSpeed = 13.0f / (def.pathCost + 13.0f);
+            this.removable = def.Removable;
+            this.isCarpet = def.IsCarpet;
         }
     }
     

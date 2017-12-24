@@ -29,6 +29,7 @@ namespace RimWorldDataExporter.Helper.Serialization {
             { typeof(float), "number" },
             { typeof(double), "number" },
             { typeof(string), "string | null" },
+            { typeof(Color), "string | null" }
         };
 
         private static string IListToTypeName<T> () {

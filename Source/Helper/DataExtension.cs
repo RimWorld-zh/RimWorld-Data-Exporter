@@ -6,8 +6,8 @@ using UnityEngine;
 using Verse;
 using RimWorld;
 
-namespace RimWorldDataExporter.Helper {
-    static class DataExtension {
+namespace RimWorldDataExporter.Helper.Serialization {
+    public static class DataExtension {
 
         /// <summary>
         /// Convert Unity color to CSS color text.

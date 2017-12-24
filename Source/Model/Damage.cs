@@ -18,23 +18,11 @@ namespace RimWorldDataExporter.Model {
         public bool isExplosive;
         public int explosionDamage = 10;
         public float explosionBuildingDamageFactor = 1f;
+        public Color explosionColorCenter = Color.white;
+        public Color explosionColorEdge = Color.white;
         public HediffDef hediff;
         public HediffDef hediffSkin;
         public HediffDef hediffSolid;
-
-        [NoCrawl]
-        public string explosionColorCenter = Color.white.ToCssColor();
-        [NoCrawl]
-        public string explosionColorEdge = Color.white.ToCssColor();
-
-        public override void Crawl(Def baseDef) {
-            base.Crawl(baseDef);
-
-            DamageDef def = baseDef as DamageDef;
-
-            this.explosionColorCenter = def.explosionColorCenter.ToCssColor();
-            this.explosionColorEdge = def.explosionColorEdge.ToCssColor();
-        }
     }
 
     class LangDamage : ELang {

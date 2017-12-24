@@ -21,10 +21,6 @@ namespace RimWorldDataExporter.Helper.Serialization {
                 value => (bool)value ? "true" : "false"
             },
             {
-                typeof(string),
-                value => $"'{value}'"
-            },
-            {
                 typeof(int),
                 value => value.ToString()
             },
@@ -36,6 +32,14 @@ namespace RimWorldDataExporter.Helper.Serialization {
                 typeof(double),
                 value => value.ToString()
             },
+            {
+                typeof(string),
+                value => $"'{value}'"
+            },
+            {
+                typeof(Color),
+                value => $"'{((Color)value).ToCssColor()}'"
+            }
         };
 
         private static string IListToTypeScript<T> (IList<T> list, int level) {
