@@ -15,7 +15,7 @@ namespace RimWorldDataExporter.Helper.Serialization {
         /// <param name="color">The Unity color</param>
         /// <returns>CSS color text</returns>
         public static string ToCssColor(this Color color) {
-            return $"rgba({(int)color.r * 255}, {(int)color.g * 255}, {(int)color.b * 255}, {color.a})";
+            return $"rgba({Mathf.Round(color.r * 255f)}, {Mathf.Round(color.g * 255f)}, {Mathf.Round(color.b * 255f)}, {color.a})";
         }
     }
 }
