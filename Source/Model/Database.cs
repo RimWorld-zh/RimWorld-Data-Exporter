@@ -21,9 +21,6 @@ namespace RimWorldDataExporter.Model {
 
         private static List<EObj> GenerateDatas() {
             var allDefs = DefDatabase<DefType>.AllDefs.Where(hook.Filter).ToList();
-            allDefs.Sort((DefType a, DefType b) => {
-                return a.defName.CompareTo(b.defName);
-            });
             var result = new List<EObj>();
             foreach (var def in allDefs) {
                 var eobj = new EType();
