@@ -56,7 +56,7 @@ namespace RimWorldDataExporter.Model {
             }
             sbIndex.AppendLine();
 
-            // export
+            // collection
             sbIndex.AppendLine($"const {Category}: {ebase}{Category} = {{");
             foreach (var data in dataList) {
                 sbIndex.AppendLine($"  {data.defName},");
@@ -64,10 +64,19 @@ namespace RimWorldDataExporter.Model {
             sbIndex.AppendLine($"}};");
             sbIndex.AppendLine();
 
+            // aggregation
+            EAggr aggregation = (hook as EData)?.GetAggregation();
+            if (aggregation != null) {
+                sbIndex.AppendLine($"export const aggregation{Category}: {aggregation.GetType().Name} = {aggregation.ToTypeSrcipt()}");
+                sbIndex.AppendLine();
+            }
+
+            // export
             sbIndex.AppendLine($"export default {Category};");
             
             File.WriteAllText(Path.Combine(path, "index.ts"), sbIndex.ToString());
 
+            // declaration
             StringBuilder sbDeclaration = new StringBuilder();
             sbDeclaration.AppendLine($"declare interface {ebase}{Category} {{");
             foreach (var data in dataList) {
@@ -75,9 +84,6 @@ namespace RimWorldDataExporter.Model {
             }
             sbDeclaration.AppendLine($"}}");
             TypeScriptHelper.AddEbaseDeclaration(ebase, Category, sbDeclaration);
-
-            // save declaration
-
         }
     }
 }

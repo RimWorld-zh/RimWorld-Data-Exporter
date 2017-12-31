@@ -37,7 +37,7 @@ namespace RimWorldDataExporter.Helper.Serialization {
         }
 
         private static string IDictToTypeName<TKey, TValue>() {
-            return $"ReadonlyDict<{typeof(TValue).ToTypeName()}>";
+            return $"ReadonlyDict<{typeof(TValue).ToTypeName()}> | null";
         }
 
         public static string ToTypeName(this Type type) {
@@ -98,11 +98,12 @@ namespace RimWorldDataExporter.Helper.Serialization {
         }
 
         public static void SaveAllTypesDeclaration(string path) {
+            SaveDeclaration(Path.Combine(path, "base.d.ts"), new[] { typeof(EData), typeof(ELang), typeof(EAggr) }, typeof(EObj), "base");
             SaveAllEObjSubclassesDeclaration(Path.Combine(path, "data.d.ts"), typeof(EData), "data");
             SaveAllEObjSubclassesDeclaration(Path.Combine(path, "lang.d.ts"), typeof(ELang), "language");
+            SaveAllEObjSubclassesDeclaration(Path.Combine(path, "aggr.d.ts"), typeof(EAggr), "aggregation");
 
             SaveAllITypeableClassesDeclaration(Path.Combine(path, "basic.d.ts"));
-            SaveDeclaration(Path.Combine(path, "base.d.ts"), new[] { typeof(EData), typeof(ELang) }, typeof(EObj), "base");
             SaveAllEnumDeclaration(Path.Combine(path, "enum.d.ts"));
         }
 
@@ -119,7 +120,11 @@ namespace RimWorldDataExporter.Helper.Serialization {
 
             foreach (Type type in types) {
                 sb.AppendLine();
-                sb.AppendLine($"declare interface {type.Name} extends {baseType.Name} {{");
+                if (type.IsSubclassOf(baseType)) {
+                    sb.AppendLine($"declare interface {type.Name} extends {baseType.Name} {{");
+                } else {
+                    sb.AppendLine($"declare interface {type.Name} {{");
+                }
                 foreach (var fieldInfo in type.GetFields(flags)) {
                     sb.AppendLine($"  readonly {fieldInfo.Name}: {fieldInfo.FieldType.ToTypeName()};");
                 }
@@ -147,10 +152,12 @@ namespace RimWorldDataExporter.Helper.Serialization {
                 sb.AppendLine("}");
             }
 
-            string ebase = baseType == typeof(EData) ? "Database" : "Langbase";
-            foreach (var kvp in declarationMap[ebase]) {
-                sb.AppendLine();
-                sb.AppendLine(kvp.Value.ToString());
+            if (baseType.IsSubclassOf(typeof(EObj))) {
+                string ebase = baseType == typeof(EData) ? "Database" : "Langbase";
+                foreach (var kvp in declarationMap[ebase]) {
+                    sb.AppendLine();
+                    sb.AppendLine(kvp.Value.ToString());
+                }
             }
 
             File.WriteAllText(path, sb.ToString());

@@ -62,6 +62,26 @@ namespace RimWorldDataExporter.Model {
                 }
             }
         }
+
+        //// Aggregation
+
+        //class AggrBiome : EAggr {
+        //    public readonly List<string> allBiomes = DefDatabase<BiomeDef>.AllDefs.Select(def => def.defName).ToList();
+
+        //    public readonly int minTemperature = -100;
+        //    public readonly int maxTemperature = 100;
+        //    public readonly int minRainfall = 0;
+        //    public readonly int maxRainfall = 6000;
+
+
+        //    public AggrBiome() {
+
+        //    }
+        //}
+
+        //public override EAggr GetAggregation() {
+        //    return new AggrBiome();
+        //}
     }
 
     class LangBiome : ELang {

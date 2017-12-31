@@ -11,6 +11,9 @@ using RimWorldDataExporter.Helper.Serialization;
 
 namespace RimWorldDataExporter.Model {
     [RimWorldDataExporter.Helper.Serialization.Serializable]
+    abstract class EAggr { }
+
+    [RimWorldDataExporter.Helper.Serialization.Serializable]
     abstract class EObj : IEquatable<EObj>, IComparable<EObj> {
         public abstract string Category { get; }
         public abstract Type DefType { get; }
@@ -45,6 +48,9 @@ namespace RimWorldDataExporter.Model {
     }
 
     abstract class EData : EObj {
+        public virtual EAggr GetAggregation() {
+            return null;
+        }
     }
 
     abstract class ELang : EObj {
