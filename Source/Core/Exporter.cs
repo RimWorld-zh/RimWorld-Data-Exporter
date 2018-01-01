@@ -95,7 +95,7 @@ namespace RimWorldDataExporter.Core {
                 }
             }
             if (lang == null) {
-                throw new Exception($"{ExporterMod.Name} Language '{code}' no found.");
+                throw new Exception($"{ExporterMod.Name} Language '{code}-{folderName}' no found.");
             }
             var path = Path.Combine(languagesPath, code);
             Directory.CreateDirectory(path);
@@ -107,7 +107,7 @@ namespace RimWorldDataExporter.Core {
                 PlayDataLoader.LoadAllPlayData(false);
 
                 LongEventHandler.QueueLongEvent(delegate {
-                    ExporterMod.Log($"Complete Loading language {Prefs.LangFolderName}.", true);
+                    ExporterMod.Log($"Complete Loading language {Prefs.LangFolderName}", true);
 
                     ExporterMod.Log($"Start exporting language {Prefs.LangFolderName}");
 
