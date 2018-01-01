@@ -198,10 +198,16 @@ namespace RimWorldDataExporter.Helper.Serialization {
             });
 
             foreach (var enumType in allEnumTypes) {
+                bool isFlag = Attribute.GetCustomAttribute(enumType, typeof(FlagsAttribute)) != null;
+
                 sb.AppendLine();
                 sb.AppendLine($"declare enum {enumType.Name} {{");
                 foreach (var name in Enum.GetNames(enumType)) {
-                    sb.AppendLine($"  {name},");
+                    if (isFlag) {
+                        sb.AppendLine($"  {name} = 0x{Convert.ToUInt64(Enum.Parse(enumType, name)).ToString("x")},");
+                    } else {
+                        sb.AppendLine($"  {name},");
+                    }
                 }
                 sb.AppendLine("}");
             }

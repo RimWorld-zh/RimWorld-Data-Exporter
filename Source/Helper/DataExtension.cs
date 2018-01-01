@@ -23,9 +23,9 @@ namespace RimWorldDataExporter.Helper.Serialization {
                     .GetValues(flags.GetType())
                     .Cast<T>()
                     .Where(value => (
-                        value.Equals(0) && flags.Equals(0)
+                        Convert.ToUInt64(flags).Equals(0) && Convert.ToUInt64(value).Equals(0)
                         ||
-                        !value.Equals(0) && (Convert.ToUInt64(flags) & Convert.ToUInt64(value)) == Convert.ToUInt64(value)
+                        !Convert.ToUInt64(value).Equals(0) && (Convert.ToUInt64(flags) & Convert.ToUInt64(value)) == Convert.ToUInt64(value)
                     ));
         }
     }
