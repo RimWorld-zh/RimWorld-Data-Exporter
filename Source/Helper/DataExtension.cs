@@ -17,5 +17,16 @@ namespace RimWorldDataExporter.Helper.Serialization {
         public static string ToCssColor(this Color color) {
             return $"rgba({Mathf.Round(color.r * 255f)}, {Mathf.Round(color.g * 255f)}, {Mathf.Round(color.b * 255f)}, {color.a})";
         }
+
+        public static IEnumerable<T> GetUniqueFlags<T>(this T flags) where T : IComparable, IFormattable, IConvertible {
+            return Enum
+                    .GetValues(flags.GetType())
+                    .Cast<T>()
+                    .Where(value => (
+                        value.Equals(0) && flags.Equals(0)
+                        ||
+                        !value.Equals(0) && (Convert.ToUInt64(flags) & Convert.ToUInt64(value)) == Convert.ToUInt64(value)
+                    ));
+        }
     }
 }
