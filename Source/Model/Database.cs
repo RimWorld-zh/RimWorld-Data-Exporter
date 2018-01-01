@@ -12,12 +12,25 @@ using RimWorldDataExporter.Helper;
 using RimWorldDataExporter.Helper.Serialization;
 
 namespace RimWorldDataExporter.Model {
-    class Database<EType, DefType> where EType : EObj, new() where DefType : Def, new() {
+    class Database<EType, DefType>
+        where EType : EObj, new()
+        where DefType : Def, new() {
+
         private static readonly EType hook = new EType();
 
         public static string Category => hook.Category;
 
-        private static readonly List<EObj> dataList = GenerateDatas();
+        private static List<EObj> dataList;
+
+        public static IEnumerable<EObj> AllDatas {
+            get {
+                return dataList;
+            }
+        }
+
+        public static void Init() {
+            dataList = GenerateDatas();
+        }
 
         private static List<EObj> GenerateDatas() {
             var allDefs = DefDatabase<DefType>.AllDefs.Where(hook.Filter).ToList();
@@ -30,17 +43,14 @@ namespace RimWorldDataExporter.Model {
             return result;
         }
 
-        public static IEnumerable<EObj> AllDatas {
-            get {
-                return dataList;
-            }
-        }
-
         public static void Save(string path) {
             if (Directory.Exists(path)) {
                 Directory.Delete(path, true);
             }
             Directory.CreateDirectory(path);
+
+            // initial
+            Init();
 
             string ebase = "Database";
             if (typeof(EType).IsSubclassOf(typeof(ELang))) {
@@ -50,7 +60,7 @@ namespace RimWorldDataExporter.Model {
             StringBuilder sbIndex = new StringBuilder();
 
             // import
-            foreach (var data in dataList) {
+            foreach (var data in AllDatas) {
                 data.Save(Path.Combine(path, $"{data.defName}.ts"));
                 sbIndex.AppendLine($"import {data.defName} from './{data.defName}';");
             }
@@ -58,7 +68,7 @@ namespace RimWorldDataExporter.Model {
 
             // collection
             sbIndex.AppendLine($"const {Category}: {ebase}{Category} = {{");
-            foreach (var data in dataList) {
+            foreach (var data in AllDatas) {
                 sbIndex.AppendLine($"  {data.defName},");
             }
             sbIndex.AppendLine($"}};");
@@ -73,13 +83,13 @@ namespace RimWorldDataExporter.Model {
 
             // export
             sbIndex.AppendLine($"export default {Category};");
-            
+
             File.WriteAllText(Path.Combine(path, "index.ts"), sbIndex.ToString());
 
             // declaration
             StringBuilder sbDeclaration = new StringBuilder();
             sbDeclaration.AppendLine($"declare interface {ebase}{Category} {{");
-            foreach (var data in dataList) {
+            foreach (var data in AllDatas) {
                 sbDeclaration.AppendLine($"  readonly {data.defName}: {typeof(EType).Name};");
             }
             sbDeclaration.AppendLine($"}}");

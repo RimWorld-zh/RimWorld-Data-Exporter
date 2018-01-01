@@ -36,8 +36,8 @@ namespace RimWorldDataExporter.Core {
 			}
             ExportDatabase();
             ExportAllLangbase();
-            
-            Log.Message("[RimWorld Data Exporter] Data has been output.");
+
+            //ExporterMod.Log("All data have been exported.");
         }
 
 		private static void ExportDatabase() {
@@ -68,16 +68,18 @@ namespace RimWorldDataExporter.Core {
             Directory.CreateDirectory(languagesPath);
 
             originLangFolderName = Prefs.LangFolderName;
+
             ExportLangbase(languagesPath, 0);
+
         }
 
-        private static void ExportLangbase(string path, int index) {
+        private static void ExportLangbase(string languagesPath, int index) {
             if (index >= LanguageMap.Count) {
-                Prefs.LangFolderName = originLangFolderName;
-                LongEventHandler.QueueLongEvent(delegate
-                {
+                LongEventHandler.QueueLongEvent(delegate {
+                    Prefs.LangFolderName = originLangFolderName;
                     PlayDataLoader.ClearAllPlayData();
                     PlayDataLoader.LoadAllPlayData(false);
+
                     ExportDeclaration();
                 }, "LoadingLongEvent", false, null);
                 return;
@@ -89,44 +91,61 @@ namespace RimWorldDataExporter.Core {
             foreach (var loadedLanugage in LanguageDatabase.AllLoadedLanguages) {
                 if (loadedLanugage.folderName == folderName) {
                     lang = loadedLanugage;
+                    break;
                 }
             }
             if (lang == null) {
-                throw new Exception($"[RimWorld Data Exporter] Language '{code}' no found.");
+                throw new Exception($"{ExporterMod.Name} Language '{code}' no found.");
             }
-
-            Prefs.LangFolderName = lang.folderName;
+            var path = Path.Combine(languagesPath, code);
+            Directory.CreateDirectory(path);
+            
             LongEventHandler.QueueLongEvent(delegate {
+                Prefs.LangFolderName = folderName;
+                ExporterMod.Log($"Start Loading language {Prefs.LangFolderName}");
                 PlayDataLoader.ClearAllPlayData();
                 PlayDataLoader.LoadAllPlayData(false);
 
-                var outputPath = Path.Combine(path, code);
-                Directory.CreateDirectory(outputPath);
+                LongEventHandler.QueueLongEvent(delegate {
+                    ExporterMod.Log($"Complete Loading language {Prefs.LangFolderName}.", true);
 
-                var allLangTypes = typeof(ELang).AllSubclassesNonAbstract().ToList();
-                allLangTypes.Sort((Type a, Type b) => {
-                    return a.Name.CompareTo(b.Name);
-                });
+                    ExporterMod.Log($"Start exporting language {Prefs.LangFolderName}");
 
-                foreach (var langType in allLangTypes) {
-                    var typeArguments = new Type[] { langType, (Activator.CreateInstance(langType) as ELang).DefType };
-                    var databaseType = typeof(Database<,>).MakeGenericType(typeArguments);
-                    var category = databaseType.GetProperty("Category").GetValue(null, null) as string;
-                    databaseType.GetMethod("Save", BindingFlags.Static | BindingFlags.Public).Invoke(null, new[] { Path.Combine(outputPath, category) });
-                }
+                    var allLangTypes = typeof(ELang).AllSubclassesNonAbstract().ToList();
+                    allLangTypes.Sort((Type a, Type b) => {
+                        return a.Name.CompareTo(b.Name);
+                    });
 
-                Log.Message($"[RimWorld Data Exporter] Language '{code}' has been output.");
-                ExportLangbase(path, index + 1);
+                    foreach (var langType in allLangTypes) {
+                        var typeArguments = new Type[] { langType, (Activator.CreateInstance(langType) as ELang).DefType };
+                        var databaseType = typeof(Database<,>).MakeGenericType(typeArguments);
+                        var category = databaseType.GetProperty("Category").GetValue(null, null) as string;
+                        databaseType.GetMethod("Save", BindingFlags.Static | BindingFlags.Public).Invoke(null, new[] { Path.Combine(path, category) });
+                    }
+
+                    ExporterMod.Log($"Complete exporting language {Prefs.LangFolderName}", true);
+
+                    ExportLangbase(languagesPath, index + 1);
+                }, "LoadingLongEvent", false, null);
             }, "LoadingLongEvent", false, null);
+
+
+
+            //LongEventHandler.QueueLongEvent(delegate {
+            //}, $"LoadingLongEvent", false, null);
         }
 
         private static void ExportDeclaration() {
+            ExporterMod.Log($"Start exporting all declarations");
+
             var outputPath = Path.Combine(Exporter.outputPath, "typings");
             if (Directory.Exists(outputPath)) {
                 Directory.Delete(outputPath, true);
             }
             Directory.CreateDirectory(outputPath);
             TypeScriptHelper.SaveAllTypesDeclaration(outputPath);
+
+            ExporterMod.Log($"Complete exporting all declarations", true);
         }
 	}
 }
