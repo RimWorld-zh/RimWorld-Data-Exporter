@@ -66,6 +66,7 @@
     <Compile Include="Model\Skill.cs" />
     <Compile Include="Model\StuffCategory.cs" />
     <Compile Include="Model\Terrain.cs" />
+    <Compile Include="Model\WorkGiver.cs" />
     <Compile Include="Model\WorkType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
