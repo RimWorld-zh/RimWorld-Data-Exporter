@@ -34,7 +34,7 @@ namespace RimWorldDataExporter.Helper.Serialization {
             },
             {
                 typeof(string),
-                value => $"'{value}'"
+                value => $"'{(value as string).Replace("'", "\\'")}'"
             },
             {
                 typeof(Color),
