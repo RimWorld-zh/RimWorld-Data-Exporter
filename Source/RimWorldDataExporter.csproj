@@ -66,6 +66,8 @@
     <Compile Include="Model\Job.cs" />
     <Compile Include="Model\JoyGiver.cs" />
     <Compile Include="Model\JoyKind.cs" />
+    <Compile Include="Model\KeyBinding.cs" />
+    <Compile Include="Model\KeyBindingCategory.cs" />
     <Compile Include="Model\MainButton.cs" />
     <Compile Include="Model\Need.cs" />
     <Compile Include="Model\Skill.cs" />
