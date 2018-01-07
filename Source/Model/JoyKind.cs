@@ -13,6 +13,9 @@ namespace RimWorldDataExporter.Model {
         public override Type DefType => typeof(JoyKindDef);
 
         [NoCrawl]
+        public List<JobDef> jobs;
+
+        [NoCrawl]
         public List<JoyGiverDef> joyGivers;
 
         [NoCrawl]
@@ -23,6 +26,11 @@ namespace RimWorldDataExporter.Model {
 
             var def = baseDef as JoyKindDef;
 
+            this.jobs =
+                DefDatabase<JobDef>
+                    .AllDefs
+                    .Where(j => j.joyKind == def)
+                    .ToList();
             this.joyGivers = 
                 DefDatabase<JoyGiverDef>
                     .AllDefs
