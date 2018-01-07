@@ -29,4 +29,9 @@ namespace RimWorldDataExporter.Model {
         public float seekerFallPerHour;
         public bool freezeWhileSleeping;
     }
+
+    class LangNeed : ELang {
+        public override string Category => "Need";
+        public override Type DefType => typeof(NeedDef);
+    }
 }
