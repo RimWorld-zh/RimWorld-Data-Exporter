@@ -206,7 +206,7 @@ namespace RimWorldDataExporter.Helper.Serialization {
                     if (isFlag) {
                         sb.AppendLine($"  {name} = 0x{Convert.ToUInt64(Enum.Parse(enumType, name)).ToString("x")},");
                     } else {
-                        sb.AppendLine($"  {name},");
+                        sb.AppendLine($"  {name} = {Convert.ToUInt64(Enum.Parse(enumType, name))},");
                     }
                 }
                 sb.AppendLine("}");
