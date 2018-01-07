@@ -70,6 +70,7 @@
     <Compile Include="Model\KeyBindingCategory.cs" />
     <Compile Include="Model\MainButton.cs" />
     <Compile Include="Model\Need.cs" />
+    <Compile Include="Model\ResearchProject.cs" />
     <Compile Include="Model\Skill.cs" />
     <Compile Include="Model\StuffCategory.cs" />
     <Compile Include="Model\Terrain.cs" />
